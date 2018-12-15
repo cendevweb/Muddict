@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable ,  BehaviorSubject ,  ReplaySubject } from 'rxjs';
+import { Observable ,  BehaviorSubject ,  ReplaySubject, from } from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/auth';
+import * as firebase from 'firebase/app';
 
 import { ApiService } from './api.service';
 import { JwtService } from './jwt.service';
@@ -19,7 +21,8 @@ export class UserService {
   constructor (
     private apiService: ApiService,
     private http: HttpClient,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private afAuth: AngularFireAuth
   ) {}
 
   // Verify JWT in localstorage with server & load user's info.
@@ -58,13 +61,40 @@ export class UserService {
 
   attemptAuth(type, credentials): Observable<User> {
     const route = (type === 'login') ? '/login' : '';
-    return this.apiService.post('/users' + route, {user: credentials})
+    const user = type === 'login' ? from(this.doLoginPasswordEmail(credentials)) : from(this.register(credentials));
+    return user;
+   /*  return this.apiService.post('/users' + route, {user: credentials})
       .pipe(map(
       data => {
         this.setAuth(data.user);
         return data;
       }
-    ));
+    )); */
+  }
+
+  doLoginPasswordEmail(credentials) {
+    return new Promise<any>((resolve, reject) => {
+      this.afAuth.auth
+      .signInWithEmailAndPassword(credentials.email, credentials.password)
+      .then(res => {
+        console.log('LOGGEDYEAH');
+        resolve(res);
+      }, err => {
+        console.log(err);
+        reject(err);
+      });
+    });
+  }
+
+  register(credentials) {
+    console.log('register', credentials);
+    return new Promise<any>((resolve, reject) => {
+      this.afAuth.auth.createUserWithEmailAndPassword(credentials.email, credentials.password)
+      .then(res => {
+        console.log('ACCOUNT CREATED');
+        resolve(res);
+      }, err => reject(err));
+    });
   }
 
   getCurrentUser(): User {
