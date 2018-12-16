@@ -28,6 +28,7 @@
     "core-js": "^2.4.1",
     "firebase": "^5.7.0",
     "marked": "^0.3.9",
+    "ngx-youtube-player": "^6.0.0",
     "rxjs": "^6.2.1",
     "rxjs-compat": "^6.0.0-rc.0",
     "zone.js": "^0.8.26"

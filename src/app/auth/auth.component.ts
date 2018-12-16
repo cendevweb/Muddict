@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { from } from 'rxjs';
 import { Errors, UserService } from '../core';
 
 @Component({
@@ -55,5 +55,22 @@ export class AuthComponent implements OnInit {
         this.isSubmitting = false;
       }
     );
+  }
+
+  googleLogin() {
+    from(this.userService.doGoogleLogin()).subscribe(
+      data => {
+        console.log('GG GOOGLE')
+        this.router.navigateByUrl('/');
+      }
+    )
+  }
+
+  facebookLogin() {
+    from(this.userService.doFacebookLogin()).subscribe(
+      data => {
+        console.log('GG FACEBOO')
+        this.router.navigateByUrl('/');
+      })
   }
 }

@@ -41,7 +41,12 @@ export class UserService {
     }
   }
 
-  setAuth(user: User) {
+  setAuth(data: firebase.auth.UserCredential) {
+    const user = {} as User;
+    user.username = data.user.displayName;
+    user.email = data.user.email;
+    user.image = data.user.photoURL;
+    user.token = data.credential.accessToken;
     // Save JWT sent from server in localstorage
     this.jwtService.saveToken(user.token);
     // Set current user data into observable
@@ -63,13 +68,6 @@ export class UserService {
     const route = (type === 'login') ? '/login' : '';
     const user = type === 'login' ? from(this.doLoginPasswordEmail(credentials)) : from(this.register(credentials));
     return user;
-   /*  return this.apiService.post('/users' + route, {user: credentials})
-      .pipe(map(
-      data => {
-        this.setAuth(data.user);
-        return data;
-      }
-    )); */
   }
 
   doLoginPasswordEmail(credentials) {
@@ -77,7 +75,9 @@ export class UserService {
       this.afAuth.auth
       .signInWithEmailAndPassword(credentials.email, credentials.password)
       .then(res => {
-        console.log('LOGGEDYEAH');
+        console.log('RESPONSEOMG', res)
+
+        this.setAuth(res);
         resolve(res);
       }, err => {
         console.log(err);
@@ -86,12 +86,36 @@ export class UserService {
     });
   }
 
+  doGoogleLogin() {
+    return new Promise<any>((resolve, reject) => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      this.afAuth.auth
+      .signInWithPopup(provider)
+      .then(res => {
+        this.setAuth(res);
+        resolve(res);
+      });
+    });
+  }
+
+  doFacebookLogin() {
+    return new Promise<any>((resolve, reject) => {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      this.afAuth.auth
+      .signInWithPopup(provider)
+      .then(res => {
+        this.setAuth(res);
+        resolve(res);
+      });
+    });
+  }
+
   register(credentials) {
-    console.log('register', credentials);
     return new Promise<any>((resolve, reject) => {
       this.afAuth.auth.createUserWithEmailAndPassword(credentials.email, credentials.password)
       .then(res => {
-        console.log('ACCOUNT CREATED');
         resolve(res);
       }, err => reject(err));
     });
