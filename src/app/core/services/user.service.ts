@@ -75,8 +75,6 @@ export class UserService {
       this.afAuth.auth
       .signInWithEmailAndPassword(credentials.email, credentials.password)
       .then(res => {
-        console.log('RESPONSEOMG', res)
-
         this.setAuth(res);
         resolve(res);
       }, err => {

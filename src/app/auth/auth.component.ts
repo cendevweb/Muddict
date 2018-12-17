@@ -60,17 +60,14 @@ export class AuthComponent implements OnInit {
   googleLogin() {
     from(this.userService.doGoogleLogin()).subscribe(
       data => {
-        console.log('GG GOOGLE')
         this.router.navigateByUrl('/');
-      }
-    )
+      });
   }
 
   facebookLogin() {
     from(this.userService.doFacebookLogin()).subscribe(
       data => {
-        console.log('GG FACEBOO')
         this.router.navigateByUrl('/');
-      })
+      });
   }
 }
